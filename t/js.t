@@ -84,12 +84,15 @@ use tests 2; # navigator
 
 use tests 2; # multiple JS environments
 {
-	$m->get(URI::file->new_abs( 't/js-script.html' ));
-	$m->get(URI::file->new_abs( 't/js-script2.html' ));
-	is $m->eval('foo'), 'baz',
+	# The purpose of creating a baz variable in one page, but not the
+	# other, is to make sure that we are actually creating a new JS
+	# environment, and not just overwriting existing variables.
+	$m->get( data_url '<script>foo="bar",baz=1</script>' );
+	$m->get( data_url '<script>foo="baz"</script>' );
+	is $m->eval('foo+window.baz'), 'bazundefined',
 		'which JS env are we in after going to another page?';
 	$m->back;
-	is $m->eval('foo'), 'bar',
+	is $m->eval('foo+window.baz'), 'bar1',
 		'and which one after we go back?';
 	$m->back;
 }
@@ -105,8 +108,8 @@ use tests 2; # javascript:
 {
 	my $uri = $m->uri;
 	$m->get("Javascript:%20foo=%22ba%ca%80%22");
-	is $m->eval('foo'), 'baʀ', 'javascript: URLs are executed';
-diag $@ if $@;
+	is $m->eval('foo'), 'baʀ', 'javascript: URLs are executed'
+		or diag $@;
 	is $m->uri, $uri, '  and do not affect the page stack'
 		or diag $m->response->as_string;
 }
@@ -166,3 +169,14 @@ _
 	like $warning, qr/line 6/, 'line numbers after <script>\n\n\n<!--';
 }
 
+use tests 1; # init callback interface (fixed in 0.002)
+{
+ my $name = "args to init callback";
+ my $passed;
+ my $M = 0+$m; # to avoid circular refs
+ $m->use_plugin('JavaScript', init => sub {
+  @_ == 1 and shift == $M and $passed = pass $name
+ });
+ $m->get(data_url '<script>1+1</script>');
+ fail $name unless $passed;
+}

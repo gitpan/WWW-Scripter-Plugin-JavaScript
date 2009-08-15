@@ -1,6 +1,14 @@
 Revision history for WWW::Scripter::Plugin::JavaScript
 
-0.001   6 April, 2009
+0.002   15 August, 2009
+        The JavaScript plugin:
+        • Fixed the init callback interface to  match  the  docs  (it
+          gets passed  the  WWW::Scripter  object,  not  the  plugin).
+        • Fixed  a  bug  introduced  in  0.001  (the  switch  to
+          WWW::Scripter) that caused the same JavaScript environ-
+          ment to be used for all pages
+
+0.001   5 April, 2009
         First version. Just a renamed and tweaked version of the Mech-
         anize plugin (see below).
 

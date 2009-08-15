@@ -1,29 +1,33 @@
-WWW-Scripter-Plugin-JavaScript-0.001 (alpha)
+WWW-Scripter-Plugin-JavaScript-0.002 (alpha)
 
-A plugin for  WWW::Scripter  that provides JavaScript support  (and a
-back end for JE included).
+A plugin for  WWW::Scripter  that provides JavaScript support
+
+This distribution contains:
+WWW::Scripter::Plugin::JavaScript     0.002 — The JavaScript plugin
+WWW::Scripter::Plugin::JavaScript::JE 0.001 — A back end for JE
 
 
 RECENT CHANGES
 
 (See the Changes file for the long version.)
 
+0.002
+-----
+• Fixed the init callback interface to match the docs (it gets passed
+  the WWW::Scripter object, not the plugin).
+• Fixed a bug introduced in 0.001 (the switch to WWW::Scripter)  that
+  caused the same JavaScript environment to be used for all pages
+
 0.001
 -----
 First version, based on the Mech plugin.
 
-Most recent changes to the Mech plugin:
+Most recent change to the Mech plugin:
 
 0.009c
 ------
 • parent has been added to
-  %WWW::Mechanize::Plugin::DOM::Window::Interface  (RT  #43582 again).
-
-0.009a
-------
-• window->top  now actually  returns  the  top  window,  rather  than
-  the parent.
-• window->parent has been added (RT #43582 again).
+  %WWW::Mechanize::Plugin::DOM::Window::Interface  (RT  #43582).
 
 
 INSTALLATION
@@ -60,6 +64,8 @@ This module requires:
 - Hash::Util::FieldHash::Compat
 
 - URI
+
+- LWP 5.815 or higher
 
 
 DOCUMENTATION

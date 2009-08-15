@@ -6,13 +6,15 @@ use ExtUtils::MakeMaker;
 # I’m keeping these separate, in case these modules should ever be dis-
 # tributed individually:
 %js_prq = (
-	CSS::DOM::Interface  => 0,
-	Encode               => 0,
-	HTML::DOM::Interface => 0,
-	Scalar::Util         => 0,
-	strict               => 0,
-	URI::Escape          => 0,
-	warnings             => 0,
+	CSS::DOM::Interface           => 0,
+	Encode                        => 0,
+	Hash::Util::FieldHash::Compat => 0,
+	HTML::DOM::Interface          => 0,
+	LWP::UserAgent                => 5.815, # handlers
+	Scalar::Util                  => 0,
+	strict                        => 0,
+	URI::Escape                   => 0,
+	warnings                      => 0,
 # for testing:
 	lib          => 0,
 	Test::More   => 0,

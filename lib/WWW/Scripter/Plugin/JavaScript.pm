@@ -4,15 +4,17 @@ use strict;   # :-(
 use warnings; # :-(
 
 use Encode 'decode_utf8';
+use LWP'UserAgent 5.815;
 use Scalar::Util qw'weaken';
 use URI::Escape 'uri_unescape';
+use Hash::Util::FieldHash::Compat 'fieldhash';
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 # Attribute constants (array indices)
 sub mech() { 0 }
-sub jsbe() { 1 } # JavaScript back-end (object)
-sub benm() { 2 } # Back-end name
+sub jsbe() { 1 } # JavaScript back-end (field hash of objects, keyed
+sub benm() { 2 } # Back-end name  # by document)
 sub init_cb() { 3 } # callback routine that's called whenever a new js
                     # environment is created
 sub alert()   { 4 }
@@ -115,10 +117,14 @@ sub event2sub {
 		};
 }
 
-
+# We have to associate each JS environment with a response object. While
+# writing this logic, I initially tried to use the document, but not all
+# URLs have documents (e.g., plain text files).
 sub _start_engine {
 	my $self = shift;
-	return $self->[jsbe] if $self->[jsbe];
+	my $res = (my $w = $self->[mech])->res;
+	return $self->[jsbe]{$res}
+	 if ($self->[jsbe] ||= &fieldhash({}))->{$res};
 	
 	if(!$self->[benm]) {
 	    # try this one first, since it's faster:
@@ -135,11 +141,11 @@ sub _start_engine {
 			"$$self[benm].pm";
 	}
 
-	$self->[jsbe] = "WWW::Scripter::Plugin::JavaScript::$$self[benm]"
-		-> new( my $w = $self->[mech] );
+	my $back_end = $self->[jsbe]{$res}
+	 = "WWW::Scripter::Plugin::JavaScript::$$self[benm]" -> new( $w );
 	require HTML::DOM::Interface;
 	require CSS::DOM::Interface;
-	for ($$self[jsbe]) {
+	for ($back_end) {
 		for my $class_info( $self->[mech]->class_info ) {
 		 $_->bind_classes($class_info) ;
 		}
@@ -153,16 +159,19 @@ sub _start_engine {
 			#     one sigh figger out zackly how it shoe be
 			#     done.
 
-	} # for $$self->[jsbe];
-	{ ($self->[init_cb]||next)->($self); }
+	} # for $back_end;
+	{ ($self->[init_cb]||next)->($w); }
 	weaken $self; # closures
-	return $$self[jsbe];
+	return $back_end;
 }
 
 sub bind_classes {
 	my $plugin = shift;
 	push @{$plugin->[cb]}, $_[0];
-	$plugin->[jsbe] && $plugin->[jsbe]->bind_classes($_[0]);
+	if($plugin->[jsbe]) {
+		$_ && $_->bind_classes($_[0])
+		 for values %{ $plugin->[jsbe] };
+	}
 }
 
 for(qw/set new_function/) {
@@ -191,7 +200,7 @@ WWW::Scripter::Plugin::JavaScript - JavaScript plugin for WWW::Scripter
 
 =head1 VERSION
 
-Version 0.001 (alpha)
+Version 0.002 (alpha)
 
 =head1 SYNOPSIS
 
@@ -416,6 +425,10 @@ CSS::DOM
 WWW::Scripter
 
 URI
+
+Hash::Util::FieldHash::Compat
+
+LWP 5.815 or higher
 
 =head1 BUGS
 
