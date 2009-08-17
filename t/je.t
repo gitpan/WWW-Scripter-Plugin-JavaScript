@@ -9,6 +9,7 @@ use strict; use warnings;
 use lib 't';
 use Test::More;
 
+use HTML'DOM 0.027;
 use HTML::DOM::Interface ':all';
 use URI::file;
 use WWW::Scripter;

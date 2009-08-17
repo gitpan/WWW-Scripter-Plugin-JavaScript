@@ -1,4 +1,4 @@
-WWW-Scripter-Plugin-JavaScript-0.002 (alpha)
+WWW-Scripter-Plugin-JavaScript-0.002a (alpha)
 
 A plugin for  WWW::Scripter  that provides JavaScript support
 
@@ -11,6 +11,12 @@ RECENT CHANGES
 
 (See the Changes file for the long version.)
 
+0.002a
+------
+HTML::DOM 0.027 and WWW::Scripter 0.004  are now required.  A bug fix
+in JE 0.033  causes the tests to trigger bugs in previous versions of
+those two modules
+
 0.002
 -----
 • Fixed the init callback interface to match the docs (it gets passed
@@ -21,13 +27,6 @@ RECENT CHANGES
 0.001
 -----
 First version, based on the Mech plugin.
-
-Most recent change to the Mech plugin:
-
-0.009c
-------
-• parent has been added to
-  %WWW::Mechanize::Plugin::DOM::Window::Interface  (RT  #43582).
 
 
 INSTALLATION
@@ -55,11 +54,11 @@ This module requires:
 
 - JE 0.022 or higher
 
-- HTML::DOM 0.010 or higher
+- HTML::DOM 0.027 or higher
 
 - CSS::DOM
 
-- WWW::Scripter
+- WWW::Scripter 0.004 or higher
 
 - Hash::Util::FieldHash::Compat
 

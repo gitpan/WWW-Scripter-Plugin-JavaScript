@@ -1,5 +1,10 @@
 Revision history for WWW::Scripter::Plugin::JavaScript
 
+0.002a  16 August, 2009
+        HTML::DOM 0.027 and WWW::Scripter 0.004  are now required.  A
+        bug fix in JE 0.033 causes the tests to trigger bugs in previ-
+        ous versions of those two modules.
+
 0.002   15 August, 2009
         The JavaScript plugin:
         • Fixed the init callback interface to  match  the  docs  (it
@@ -10,7 +15,7 @@ Revision history for WWW::Scripter::Plugin::JavaScript
 
 0.001   5 April, 2009
         First version. Just a renamed and tweaked version of the Mech-
-        anize plugin (see below).
+        anize JavaScript plugin (see below).
 
 
 Revision history for WWW::Mechanize::Plugin::JavaScript and ::DOM

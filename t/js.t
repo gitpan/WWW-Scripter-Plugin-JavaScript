@@ -8,7 +8,7 @@ use lib 't';
 use Test::More;
 
 use URI::file;
-use WWW::Scripter;
+use WWW::Scripter 0.004;
 
 # blank page for playing with JS; some tests need their own, though
 my $js = (my $m = new WWW::Scripter)->use_plugin('JavaScript');
@@ -119,7 +119,8 @@ use tests 1; # non-HTML pages
 	(my $m = new WWW::Scripter)->use_plugin('JavaScript');
 	$m->get('data:text/plain,');
 	is eval{$m->eval("35")}, 35,
-	  'JS is available even when the page is not HTML';
+	  'JS is available even when the page is not HTML'
+	   or diag $@;
 }
 
 use tests 4; # <!-- -->  (first two tests based on RT #43582 by Imre Rad)

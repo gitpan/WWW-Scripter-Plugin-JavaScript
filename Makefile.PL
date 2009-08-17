@@ -19,7 +19,7 @@ use ExtUtils::MakeMaker;
 	lib          => 0,
 	Test::More   => 0,
 	URI::file    => 0,
-	WWW'Scripter => 0,
+	WWW'Scripter => 0.004, # frames method for non-HTML docs
 );
 %je_prq = (
 	Carp                          => 0,
@@ -30,6 +30,7 @@ use ExtUtils::MakeMaker;
 	strict                        => 0,
 	warnings                      => 0,
 # for testing:
+	HTML'DOM     => 0.027, # document.write and node lists
 	lib          => 0,
 	Test::More   => 0,
 	URI::file    => 0,
@@ -46,8 +47,8 @@ for(\(%js_prq, %je_prq)) {
 WriteMakefile(
     NAME                => 'WWW::Scripter::Plugin::JavaScript',
     AUTHOR              => 'Father Chrysostomos <sprout & cpan . org>',
-    VERSION_FROM        => 'lib/WWW/Scripter/Plugin/JavaScript.pm',
-#    VERSION             => "0.009c",
+#    VERSION_FROM        => 'lib/WWW/Scripter/Plugin/JavaScript.pm',
+    VERSION             => "0.002a",
     ABSTRACT_FROM       => 'lib/WWW/Scripter/Plugin/JavaScript.pm',
     PL_FILES            => {},
     PREREQ_PM           => \%prq,
