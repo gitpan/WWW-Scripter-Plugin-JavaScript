@@ -9,7 +9,7 @@ use HTML::DOM::Interface ':all'; # for the constants
 use JE 0.022;
 use Scalar::Util qw'weaken';
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 our @ISA = 'JE';
 
 fieldhash my %parathia;
@@ -25,7 +25,7 @@ $types[NUM ] = Number  =>;
 $types[OBJ ] = null    =>;
 
 sub new {
-	my $self = SUPER::new{shift};
+	my $self = SUPER::new{shift} html_mode => 1;
 	$parathia{$self} = my $parathi = shift;;
 	weaken( $js_envs{$parathi} = $self );
 	
@@ -293,7 +293,7 @@ WWW::Scripter::Plugin::JavaScript::JE - JE backend for WMSJS
 
 =head1 VERSION
 
-0.001 (alpha)
+0.002 (alpha)
 
 =head1 DESCRIPTION
 
@@ -308,7 +308,7 @@ Hash::Util::FieldHash::Compat
 
 HTML::DOM 0.008 or later
 
-JE 0.022 or later
+JE 0.022 or later (0.034 or later recommended)
 
 =head1 SEE ALSO
 

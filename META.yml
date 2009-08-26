@@ -1,37 +1,26 @@
---- #YAML:1.0
-name:               WWW-Scripter-Plugin-JavaScript
-version:            0.002a
-abstract:           JavaScript plugin for WWW::Scripter
-author:
-    - Father Chrysostomos <sprout & cpan . org>
-license:            unknown
-distribution_type:  module
-configure_requires:
-    ExtUtils::MakeMaker:  0
-build_requires:
-    ExtUtils::MakeMaker:  0
+# http://module-build.sourceforge.net/META-spec.html
+#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
+name:         WWW-Scripter-Plugin-JavaScript
+version:      0.002b
+version_from: 
+installdirs:  site
 requires:
-    Carp:                 0
-    CSS::DOM::Interface:  0
-    Encode:               0
-    Hash::Util::FieldHash::Compat:  0
-    HTML::DOM:            0.027
-    HTML::DOM::Interface:  0
-    JE:                   0.022
-    lib:                  0
-    LWP::UserAgent:       5.815
-    Scalar::Util:         0
-    strict:               0
-    Test::More:           0
-    URI::Escape:          0
-    URI::file:            0
-    warnings:             0
-    WWW::Scripter:        0.004
-no_index:
-    directory:
-        - t
-        - inc
-generated_by:       ExtUtils::MakeMaker version 6.54
-meta-spec:
-    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
-    version:  1.4
+    Carp:                          0
+    CSS::DOM::Interface:           0
+    Encode:                        0
+    Hash::Util::FieldHash::Compat: 0
+    HTML::DOM:                     0.027
+    HTML::DOM::Interface:          0
+    JE:                            0.022
+    lib:                           0
+    LWP::UserAgent:                5.815
+    Scalar::Util:                  0
+    strict:                        0
+    Test::More:                    0
+    URI::Escape:                   0
+    URI::file:                     0
+    warnings:                      0
+    WWW::Scripter:                 0.004
+
+distribution_type: module
+generated_by: ExtUtils::MakeMaker version 6.17

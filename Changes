@@ -1,5 +1,11 @@
 Revision history for WWW::Scripter::Plugin::JavaScript
 
+0.002b  25 August, 2009
+        JE back end:
+        • It now turns on  JE’s HTML mode  (to support HTML  comments
+          embedded in JavaScript).  Version 0.034 of  JE  is required
+          for this feature to work.
+
 0.002a  16 August, 2009
         HTML::DOM 0.027 and WWW::Scripter 0.004  are now required.  A
         bug fix in JE 0.033 causes the tests to trigger bugs in previ-

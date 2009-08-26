@@ -1,15 +1,21 @@
-WWW-Scripter-Plugin-JavaScript-0.002a (alpha)
+WWW-Scripter-Plugin-JavaScript-0.002b (alpha)
 
 A plugin for  WWW::Scripter  that provides JavaScript support
 
 This distribution contains:
 WWW::Scripter::Plugin::JavaScript     0.002 — The JavaScript plugin
-WWW::Scripter::Plugin::JavaScript::JE 0.001 — A back end for JE
+WWW::Scripter::Plugin::JavaScript::JE 0.002 — A back end for JE
 
 
 RECENT CHANGES
 
 (See the Changes file for the long version.)
+
+0.002b
+------
+The JE back end now turns on JE’s HTML mode (to support HTML comments
+embedded in JavaScript). Version 0.034 of JE is required for this fea-
+ture to work.
 
 0.002a
 ------
@@ -52,7 +58,7 @@ This module requires:
 
 - perl 5.8.3 or higher (5.8.4 or higher recommended)
 
-- JE 0.022 or higher
+- JE 0.022 or higher (0.034 or higher recommended)
 
 - HTML::DOM 0.027 or higher
 

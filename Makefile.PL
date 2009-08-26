@@ -48,7 +48,7 @@ WriteMakefile(
     NAME                => 'WWW::Scripter::Plugin::JavaScript',
     AUTHOR              => 'Father Chrysostomos <sprout & cpan . org>',
 #    VERSION_FROM        => 'lib/WWW/Scripter/Plugin/JavaScript.pm',
-    VERSION             => "0.002a",
+    VERSION             => "0.002b",
     ABSTRACT_FROM       => 'lib/WWW/Scripter/Plugin/JavaScript.pm',
     PL_FILES            => {},
     PREREQ_PM           => \%prq,

@@ -14,6 +14,13 @@ use HTML::DOM::Interface ':all';
 use URI::file;
 use WWW::Scripter;
 
+sub data_url {
+	my $u = new URI 'data:';
+	$u->media_type('text/html');
+	$u->data(shift);
+	$u
+}
+
 # blank page for playing with JS; some tests need their own, though
 my $js = (my $m = new WWW::Scripter)->use_plugin('JavaScript',
 	engine => 'JE'
@@ -101,8 +108,8 @@ use tests 3; # frames
 		'the two methods return the same object';
 }
 
-use tests 1; # var statements should create vars (broken in 0.006)
-{
+use tests 1; # var statements should create vars (broken in 0.006
+{            # [Mech plugin])
 	ok $m->eval(q|
 		var zarbardar;
 		"zarbardar" in this
@@ -110,11 +117,37 @@ use tests 1; # var statements should create vars (broken in 0.006)
 }
 
 use tests 1; # form event attributes with unusable scope chains
-{            # (broken in 0.002; fixed in 0.007)
+{            # (broken in 0.002; fixed in 0.007 [Mech plugin])
  $m->get(URI::file->new_abs( 't/je-form-event.html' ));
  $m->submit_form(
        form_name => 'y',
        button    => 'Search Now'
   );
  like $m->uri->query, qr/x=lofasz/, 'form event attributes';
+}
+
+use tests 2; # inline HTML comments (support added in 0.002)
+SKIP:{
+ skip("JE 0.034 required for this test",2) unless eval '1;use JE 0.034';
+
+ my $warnings;
+ local $SIG{__WARN__} = sub { ++$warnings; diag shift };
+
+ $m->get(data_url <<'</html>');
+<script type="text/javascript" language="JavaScript">
+    function isginnf(omr)
+      {
+      avrn <!--o=wnwe aDt(e);
+      ofmr.itmzeoenOffste.avleu=onwg.teTmieoznOefsfe(t);
+<!-- UU_OMDP L480003D PTA- >-
+      ofr.muluoignwp.avleu=ofr.mpdw.avleu;
+<!-- nEdU UM_O D->-
+      ertrun; 
+      }
+</script>
+</html>
+ 
+ ok(!$warnings,
+   'no warnings (syntax errors) when HTML comments are embedded in JS');
+ ok $m->eval('isginnf'), 'The code around the HTML comments actually runs';
 }
