@@ -4,12 +4,18 @@ A plugin for  WWW::Scripter  that provides JavaScript support
 
 This distribution contains:
 WWW::Scripter::Plugin::JavaScript     0.002 — The JavaScript plugin
-WWW::Scripter::Plugin::JavaScript::JE 0.002 — A back end for JE
+WWW::Scripter::Plugin::JavaScript::JE 0.003 — A back end for JE
 
 
 RECENT CHANGES
 
 (See the Changes file for the long version.)
+
+0.002c
+------
+This release simply fixes a test to check for JE 0.035 instead of  JE
+0.034 before deciding not to skip a test.  (The JE  back end has been
+bumped to version 0.003 as its docs have changed.)
 
 0.002b
 ------
@@ -22,17 +28,6 @@ ture to work.
 HTML::DOM 0.027 and WWW::Scripter 0.004  are now required.  A bug fix
 in JE 0.033  causes the tests to trigger bugs in previous versions of
 those two modules
-
-0.002
------
-• Fixed the init callback interface to match the docs (it gets passed
-  the WWW::Scripter object, not the plugin).
-• Fixed a bug introduced in 0.001 (the switch to WWW::Scripter)  that
-  caused the same JavaScript environment to be used for all pages
-
-0.001
------
-First version, based on the Mech plugin.
 
 
 INSTALLATION
@@ -58,7 +53,7 @@ This module requires:
 
 - perl 5.8.3 or higher (5.8.4 or higher recommended)
 
-- JE 0.022 or higher (0.034 or higher recommended)
+- JE 0.022 or higher (0.035 or higher recommended)
 
 - HTML::DOM 0.027 or higher
 

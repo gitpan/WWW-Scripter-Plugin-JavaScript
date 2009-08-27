@@ -128,7 +128,7 @@ use tests 1; # form event attributes with unusable scope chains
 
 use tests 2; # inline HTML comments (support added in 0.002)
 SKIP:{
- skip("JE 0.034 required for this test",2) unless eval '1;use JE 0.034';
+ skip("JE 0.035 required for this test",2) unless eval '1;use JE 0.035';
 
  my $warnings;
  local $SIG{__WARN__} = sub { ++$warnings; diag shift };
