@@ -6,14 +6,17 @@ use warnings; # :-(
 use Carp 'croak';
 use Hash::Util::FieldHash::Compat 'fieldhash';
 use HTML::DOM::Interface ':all'; # for the constants
-use JE 0.022;
-use Scalar::Util qw'weaken';
+use JE 0.038; # call_with
+use Scalar::Util 1.09 qw'weaken refaddr';
 
-our $VERSION = '0.003';
+our $VERSION = '0.004';
 our @ISA = 'JE';
 
 fieldhash my %parathia;
 fieldhash my %js_envs;
+# ~~~ Both %js_envs and the field hash contained in the JS plugin are more
+#     or less identical. We need to refactor things to eliminate the redun-
+#     dancy.
 
 # No need to implement eval since JE's method
 # is sufficient
@@ -26,8 +29,8 @@ $types[OBJ ] = null    =>;
 
 sub new {
 	my $self = SUPER::new{shift} html_mode => 1;
-	$parathia{$self} = my $parathi = shift;;
-	weaken( $js_envs{$parathi} = $self );
+	weaken( $parathia{$self} = my $parathi = shift );
+	$js_envs{$parathi->response} = $self;
 	
 	my $i = \%WWW'Scripter'WindowInterface;
 	for(grep !/^_/ && $$i{$_} & METHOD, =>=> keys %$i) {
@@ -99,19 +102,23 @@ sub new {
 		package => 'WWW::Scripter',
 		wrapper => sub {
 			my ($self, $window) = @_;
+
 			# ~~~ This needs to be modified to create a special
 			#     restrictive wrapper if the $window has a
 			#     different origin.
-			$js_envs{$window}
-				# We have to use this roundabout method
-				# rather than __PACKAGE__->new($window),
-				# because the JS plugin needs to do its
-				# stuff (binding classes, etc.).
-				|| $window->plugin("JavaScript")
-				    ->eval($window,'this');
-				# ~~~ and it looks as though we need to
-				#     modify the JS plugin to make the back
-				#     end accessible (to avoid the eval).
+			# Fetch the cached JavaScript  environment  corres-
+			# poding to the WWW::Scripter object. If it doesn’t
+			# exist, then we have to create one,  since it is a
+			# page with no scripts.  (JS environments are  cre-
+			# ated on demand.)  We don’t have to use ||=,  as
+			# the ->eval below indirectly calls our own ‘new’
+			#  method,  which  adds  to  the  cache  above.
+#warn $window, " ", $window->response, " ", $window->uri;
+			no warnings 'uninitialized';
+			refaddr $js_envs{$window->response}
+			 == refaddr $self
+			  and return $self;
+			(__PACKAGE__."::Proxy")->new($window)
 		},
 	);
 	$self->bind_class(
@@ -124,6 +131,33 @@ sub new {
 	# ~~~ We also need a 'JE' wrapper, that will create a special
 	#     objcet that delegates to the JS environment currently
 	#     belonging to the window.
+
+	for my $p($self->{String}{prototype}) {
+		for my $v(
+		 ['anchor','a','name'],
+		 ['fontcolor','font','color'],
+		 ['fontsize','font','size'],
+		 ['link','a','href'],
+		) {
+			$p->new_method(
+			 $$v[0],
+			 sub{
+			  qq'<$$v[1] $$v[2]="'
+			  . (defined $_[1] ? $_[1] : 'undefined')
+			  . qq'">$_[0]</$$v[1]>'
+			 }
+			)
+		}
+		for my $v('big', 'blink', 'small','strike','sub','sup') {
+			$p->new_method( $v, sub{"<$v>$_[0]</$v>"} )
+		}
+		for my $v(['bold','b'],['fixed','tt'],['italics','i'],) {
+			$p->new_method(
+			 $$v[0],
+			 sub{"<$$v[1]>$_[0]</$$v[1]>"}
+			);
+		}
+	}
 
 	# for speed:
 	$self->prop('frames' => $self);
@@ -175,14 +209,23 @@ sub bind_classes {
 			unwrap  => 1,
 			package => $_,
 			name    => $$classes{$_},
-			methods => [ map 
-			   $$i{$_} & VOID ? $_ : "$_:$types[$$i{$_} & TYPE]",
-			   grep !/^_/ && $$i{$_} & METHOD, keys %$i ],
-			props => { map 
+			methods => { map {
+			   my $perlname = $_;
+			   $perlname .= 16 if $$i{$_} & UTF16;
+			   $_ => $$i{$_} & VOID
+			    ? $perlname
+			    : "$perlname:$types[$$i{$_} & TYPE]"
+			  } grep !/^_/ && $$i{$_} & METHOD, keys %$i },
+			props => { map {
+			   my $perlname = $_;
+			   $perlname .= 16 if $$i{$_} & UTF16;
 			   $$i{$_} & READONLY
-			      ? ($_ =>{fetch=>"$_:$types[$$i{$_} & TYPE]"})
-			      : ($_ => "$_:$types[$$i{$_} & TYPE]"),
-			   grep !/^_/ && !($$i{$_} & METHOD), keys %$i  },
+			      ? ($_ =>{
+			          fetch=>
+			           "$perlname:$types[$$i{$_} & TYPE]"
+			        })
+			      : ($_ => "$perlname:$types[$$i{$_} & TYPE]")
+			 } grep !/^_/ && !($$i{$_} & METHOD), keys %$i  },
 			hash  => $$i{_hash},
 			array => $$i{_array},
 			exists $$i{_isa} ? (isa => $$i{_isa}) : (),
@@ -238,17 +281,14 @@ sub event2sub {
 	# returns a list of form element names and values, which is *not*
 	# what we  want.  (We  want  the  element’s  parent  form  where
 	# applicable.)
-	my $func =
-		($w->compile("(function(){ $code\n })",$url,$line)||die $@)
+	($w->compile("(function(){ $code\n })",$url,$line)||die $@)
 		->execute($w, bless [
 			$w,
+			$w->upgrade($elem->ownerDocument),
 			$elem->tag ne 'form' && $elem->can('form')
 			  ? $w->upgrade($elem->form) : (),
 			my $wrapper=($w->upgrade($elem))
 		], 'JE::Scope');
-
-	sub { my $ret = $func->apply($wrapper);
-	      return typeof $ret eq 'undefined' ? undef : $ret };
 }
 
 sub define_setter {
@@ -278,22 +318,61 @@ sub new_function {
 	}
 }
 
+sub exists {
+	my $self = shift;
+	SUPER::exists $self @_
+	 or do {
+		my($name) = @_;
+		my $window = $parathia{$self};
+		$name =~ /^(?:0|[1-9]\d*)\z/ && $name < 4294967295
+		? defined $window->frames->[$name]
+		: defined $window->frames->{$name}
+	}
+}
+
+
+package WWW::Scripter::Plugin::JavaScript::JE::Proxy;
+
+# ~~~ This package needs to override any method used internally by
+#     JavaScript that returns a JE datatype to return a wrapper instead.
+
+sub new {
+ return bless \(my $w = pop)
+}
+
+sub AUTOLOAD {
+ my $window = ${;shift};
+ (
+  $js_envs{$window->response}
+   # We have to use this roundabout method
+   # rather than __PACKAGE__->new($window),
+   # because the JS plugin needs to do its
+   # stuff (binding classes, etc.).
+   ||$window->plugin("JavaScript")
+        ->eval($window,'this')
+				# ~~~ and it looks as though we need to
+				#     modify the JS plugin to make the back
+				#     end accessible (to avoid the eval).
+ )->${\(our $AUTOLOAD =~ /.*::(.+)\z/)[0]}(@_)
+}
+
+sub DESTROY{}
+sub isa {
+ goto &UNIVERSAL'isa;
+}
+
 
 =cut
 
-
 # ------------------ DOCS --------------------#
-
-1;
-
 
 =head1 NAME
 
-WWW::Scripter::Plugin::JavaScript::JE - JE backend for WMSJS
+WWW::Scripter::Plugin::JavaScript::JE - JE backend for WSPJS
 
 =head1 VERSION
 
-0.003 (alpha)
+0.004 (alpha)
 
 =head1 DESCRIPTION
 
@@ -308,7 +387,7 @@ Hash::Util::FieldHash::Compat
 
 HTML::DOM 0.008 or later
 
-JE 0.022 or later (0.035 or later recommended)
+JE 0.038 or higher
 
 =head1 SEE ALSO
 

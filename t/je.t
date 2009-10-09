@@ -127,13 +127,10 @@ use tests 1; # form event attributes with unusable scope chains
 }
 
 use tests 2; # inline HTML comments (support added in 0.002)
-SKIP:{
- skip("JE 0.035 required for this test",2) unless eval '1;use JE 0.035';
+my $warnings;
+local $SIG{__WARN__} = sub { ++$warnings; diag shift };
 
- my $warnings;
- local $SIG{__WARN__} = sub { ++$warnings; diag shift };
-
- $m->get(data_url <<'</html>');
+$m->get(data_url <<'</html>');
 <script type="text/javascript" language="JavaScript">
     function isginnf(omr)
       {
@@ -147,7 +144,77 @@ SKIP:{
 </script>
 </html>
  
- ok(!$warnings,
+ok(!$warnings,
    'no warnings (syntax errors) when HTML comments are embedded in JS');
- ok $m->eval('isginnf'), 'The code around the HTML comments actually runs';
-}
+ok $m->eval('isginnf'), 'The code around the HTML comments actually runs';
+
+use tests 17; # Those weird and utterly useless HTML-generating string
+              # methods that have been part of JavaScript since day 1.
+is $m->eval('"pext".anchor("med")'), '<a name="med">pext</a>', '.anchor';
+is $m->eval('"clit".big   (     )'), '<big>clit</big>'       , '.big'   ;
+is $m->eval('"clile".blink(     )'), '<blink>clile</blink>'  , '.blink' ;
+is $m->eval('"dwew" .bold (     )'), '<b>dwew</b>'           , '.bold'  ;
+is $m->eval('"dro"  .fixed(     )'), '<tt>dro</tt>'          , '.fixed' ;
+is $m->eval('"crin".fontcolor("drow")'), '<font color="drow">crin</font>',
+ '.fontcolor';
+is $m->eval('"brelp".fontsize("blat")'), '<font size="blat">brelp</font>',
+ '.fontsize';
+is $m->eval('"bleen".italics (      )'), '<i>bleen</i>'       , '.italics';
+is $m->eval('"crare".link  ("blon")'), '<a href="blon">crare</a>', '.link';
+is $m->eval('"bleck".small (      )'), '<small>bleck</small>'   , '.small';
+is $m->eval('"blee" .strike(      )'), '<strike>blee</strike>' , '.strike';
+is $m->eval('"bleard".sub  (      )'), '<sub>bleard</sub>'     , '.sub'   ;
+is $m->eval('"clor"  .sup  (      )'), '<sup>clor</sup>'       , '.sup'   ;
+is $m->eval('"byph".anchor()'), '<a name="undefined">byph</a>',
+ '.anchor with no args';
+is $m->eval('"bames".fontcolor()'), '<font color="undefined">bames</font>',
+ '.fontcolor with no args';
+is $m->eval('"blash".fontsize()'), '<font size="undefined">blash</font>',
+ '.fontsize with no args';
+is $m->eval('"brode".link()'), '<a href="undefined">brode</a>',
+ '.link with no args';
+
+use tests 4; # Existence of non-core global JS properties.
+# It’s possible to make properties only half-exist, in that window.foo
+# returns something, but it’s not a scope variable and the hasOwnProperty
+# operator can’t see it. This was the case with collection properties prior
+# to version 0.004.
+$m->document->innerHTML("<iframe name=ba>");
+ok $m->eval('hasOwnProperty("document")'),
+ 'hasOwnProperty can see window properties listed by WWW::Scripter';
+ok $m->eval('hasOwnProperty("ba")'),
+ 'hasOwnProperty can see collection properties of the window';
+ok $m->eval('document'),
+ 'window properties listed by WWW::Scripter are in scope';
+ok $m->eval('ba'),
+ 'collection properties of the window are in scope';
+
+use tests 4; # HTML event handler scope
+$m->back until $m->uri =~ /blank/;
+$m->eval(q{
+ document.innerHTML = "<form name=f><input id=it onclick='which=thing'>"
+ var it = document.getElementById('it');
+ window.thing="παράθι"
+ it.click(); is(which, "παράθι", 'window is in event scope')
+ document.thing='ἔγγραφον'
+ it.click(); is(which,'ἔγγραφον','document shadows window in event scope')
+ document.f.thing='μορφὴ'
+ it.click(); is(which,'μορφὴ', 'form shadows document in event scope')
+ it.thing='πράγμα'
+ it.click(); is(which,'πράγμα', 'target shadows form in event scope')
+});
+
+use tests 2; # UTF-16
+$m->eval("
+ is((node=document.createTextNode('\x{10000}aa')).length,4,'UTF-16 prop');
+ node.insertData(2,'b')
+ is(node.data, '\x{10000}baa', 'UTF-16 method')
+");
+
+use tests 1; # frames retaining the same global object from one page to the
+             # next (problem in 0.003 and earlier)
+$m->document->innerHTML(q|<iframe name=f></iframe>|);
+$m->eval(q|f.foo="bar"|);
+$m->frames->{f}->get("data:text/html,");
+is $m->eval("''+f.foo"), 'undefined',
+ "JS-less frames get a new global object when a page is fetched";

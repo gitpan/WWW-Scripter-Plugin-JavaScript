@@ -8,8 +8,9 @@ use LWP'UserAgent 5.815;
 use Scalar::Util qw'weaken';
 use URI::Escape 'uri_unescape';
 use Hash::Util::FieldHash::Compat 'fieldhash';
+use WWW::Scripter 0.007; # working clone and class_info
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 # Attribute constants (array indices)
 sub mech() { 0 }
@@ -103,18 +104,8 @@ sub eval {
 sub event2sub {
 		my($self,$mech,$elem,undef,$code,$url,$line) = @_;
 
-		my $func = $self->
+		$self->
 			_start_engine->event2sub($code,$elem,$url,$line);
-
-		sub {
-			my $event_obj = shift;
-			my $ret = &$func($event_obj);
-			defined $ret and !$ret and
-				$event_obj->preventDefault;
-			# ~~~ I need to change this logic for whichever
-			#     event has it reversed (don't remember which
-			#     it was; I'll have to look it up!).
-		};
 }
 
 # We have to associate each JS environment with a response object. While
@@ -189,6 +180,16 @@ for(qw/set new_function/) {
 sub engine { shift->[benm] }
 
 
+# ~~~ We may be able to forego this is we make methods above that access
+#     $self->[mech] rely instead on the $mech argument passed in.
+sub clone {
+ my $self = shift;
+ my $clone = [@$self];
+ weaken( $clone->[mech] = shift );
+ bless $clone, ref $self;
+}
+
+
 # ------------------ DOCS --------------------#
 
 1;
@@ -200,7 +201,7 @@ WWW::Scripter::Plugin::JavaScript - JavaScript plugin for WWW::Scripter
 
 =head1 VERSION
 
-Version 0.002 (alpha)
+Version 0.003 (alpha)
 
 =head1 SYNOPSIS
 
@@ -393,13 +394,17 @@ does the type conversion. Only 'Number' is used right now.
 =item event2sub ($code, $elem, $url, $first_line)
 
 This method needs to turn the
-event handler code in C<$code> into a
-coderef, or an object that can be used as such, and then return it. That 
-coderef will be
-called with an HTML::DOM::Event object as its sole argument. It's return 
+event handler code in C<$code> into an object with a C<call_with> method
+and then return it. That object's C<call_with>
+method will be
+called with the event target and the event
+object as its two arguments. Its return 
 value, if
 defined, will be used to determine whether the event's C<preventDefault>
-method should be called.
+method is called.
+
+The function's scope must contain the following objects: the global object,
+the document, the element's form (if there is one) and the element itself.
 
 =item define_setter
 
@@ -415,14 +420,14 @@ be removed some time before version 1.
 
 perl 5.8.3 or higher (5.8.4 or higher recommended)
 
-HTML::DOM 0.010 or later
+HTML::DOM 0.032 or higher
 
 JE 0.022 or later (when there is a SpiderMonkey binding available it will 
 become optional)
 
 CSS::DOM
 
-WWW::Scripter
+WWW::Scripter 0.007 or higher
 
 URI
 

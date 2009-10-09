@@ -8,7 +8,7 @@ use lib 't';
 use Test::More;
 
 use URI::file;
-use WWW::Scripter 0.004;
+use WWW::Scripter 0.006; # submit method that triggers events
 
 # blank page for playing with JS; some tests need their own, though
 my $js = (my $m = new WWW::Scripter)->use_plugin('JavaScript');
@@ -174,10 +174,28 @@ use tests 1; # init callback interface (fixed in 0.002)
 {
  my $name = "args to init callback";
  my $passed;
+ my $m = new WWW::Scripter;
  my $M = 0+$m; # to avoid circular refs
  $m->use_plugin('JavaScript', init => sub {
   @_ == 1 and shift == $M and $passed = pass $name
  });
  $m->get(data_url '<script>1+1</script>');
  fail $name unless $passed;
+}
+
+use tests 3; # event handlers
+{
+ $m->get(my $url = data_url <<'');
+  <form name=f onsubmit='return false' action="404">
+
+ $m->submit;
+ is $m->uri, $url, '<form onsubmit="return false">' or back $m;
+ 
+ like $m->eval(" document.f.onsubmit "), qr/return false/,
+  'form.onsubmit returns a JS function when assigned via the HTML attr';
+  # used to return function { [native code] }
+
+ $m->eval(" document.f.onsubmit = function(){ return false } ");
+ $m->submit;
+ is $m->uri, $url, 'form.onsubmit=function(){return false}';
 }

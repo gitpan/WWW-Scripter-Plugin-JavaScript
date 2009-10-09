@@ -1,5 +1,39 @@
 Revision history for WWW::Scripter::Plugin::JavaScript
 
+0.003   ??????
+        The JavaScript plugin:
+        • Updated to work with  HTML::DOM  0.032’s new event  handler
+          model. This fixes various bugs involving event handler prop-
+          erties (‘theForm.onsubmit’).
+        • Calling  WWW::Scripter’s  eval  method would run  the  Java-
+          Script code always in the main window,  if when called from
+          the WWW::Scripter object corresponding to a frame. This has
+          been fixed. This is part of the solution to the frames prob-
+          lem mentioned below.
+        JE back end (0.004):
+        • We now support those utterly useless  HTML-generating  meth-
+          ods of string objects that have  been  part  of  JavaScript
+          since the very beginning,  and which have been added solely
+          for completeness’ sake.
+        • We now override JE’s exists method, so that collection prop-
+          erties of the window object appear in scope and can be seen
+          by hasOwnProperty.
+        • Likewise updated to work with the new event  handler  model.
+        • The scope  of  an  event  handler  now  includes  the  docu-
+          ment object.
+        • For those cases where HTML::DOM  provides UTF-16 methods in
+          addition to the usual ones,  JavaScript now uses the UTF-16
+          versions.  (This makes  textNode.data.length  equivalent to
+          textNode.length.)
+        • It used to be that frames with no scripts in them that were
+          accessed by JavaScript code in the main window would  share
+          the global  object  with  the  main  window.  Also,  window
+          objects,  if referenced by JavaScript variables in  another
+          frame,  would continue to refer to the same  global  object
+          when the frame was navigated.  This mess  has  been  mostly
+          cleaned up. There are a few rough edges that will be ironed
+          out in a future release.
+
 0.002c  27 August, 2009
         JE back end (0.003):
         • This release simply fixes a test  to  check  for  JE  0.035
