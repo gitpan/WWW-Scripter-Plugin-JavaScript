@@ -1,6 +1,15 @@
 Revision history for WWW::Scripter::Plugin::JavaScript
 
-0.003   ??????
+0.004   25 October, 2009
+        The JavaScript Plugin:
+        • Scripts in frames now run in the context of the frame,  not
+          the top-level window.
+        JE back end (0.005):
+        • We now explicitly require version 0.032 of HTML::DOM::Inter-
+          face.  (This should have been added  in  the  previous  ver-
+          sion.)
+
+0.003   9 October, 2009
         The JavaScript plugin:
         • Updated to work with  HTML::DOM  0.032’s new event  handler
           model. This fixes various bugs involving event handler prop-
@@ -10,6 +19,8 @@ Revision history for WWW::Scripter::Plugin::JavaScript
           the WWW::Scripter object corresponding to a frame. This has
           been fixed. This is part of the solution to the frames prob-
           lem mentioned below.
+        •‘require WWW::Scripter::Plugin::JavaScript’  no longer  dies
+          if WWW::Scripter is not already loaded.
         JE back end (0.004):
         • We now support those utterly useless  HTML-generating  meth-
           ods of string objects that have  been  part  of  JavaScript

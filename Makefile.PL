@@ -25,7 +25,7 @@ use ExtUtils::MakeMaker;
 %je_prq = (
 	Carp                          => 0,
 	Hash::Util::FieldHash::Compat => 0,
-	HTML::DOM::Interface          => 0,
+	HTML::DOM::Interface          => 0.032, # UTF16 export
 	JE                            =>  .038, # call_with
 	Scalar::Util                  => 1.09, # refaddr
 	strict                        => 0,

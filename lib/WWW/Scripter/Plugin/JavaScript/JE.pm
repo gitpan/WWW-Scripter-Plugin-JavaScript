@@ -5,11 +5,11 @@ use warnings; # :-(
 
 use Carp 'croak';
 use Hash::Util::FieldHash::Compat 'fieldhash';
-use HTML::DOM::Interface ':all'; # for the constants
-use JE 0.038; # call_with
+use HTML::DOM::Interface 0.032 ':all'; # for the constants (0.032
+use JE 0.038; # call_with              # for UTF16)
 use Scalar::Util 1.09 qw'weaken refaddr';
 
-our $VERSION = '0.004';
+our $VERSION = '0.005';
 our @ISA = 'JE';
 
 fieldhash my %parathia;
@@ -372,7 +372,7 @@ WWW::Scripter::Plugin::JavaScript::JE - JE backend for WSPJS
 
 =head1 VERSION
 
-0.004 (alpha)
+0.005 (alpha)
 
 =head1 DESCRIPTION
 
@@ -385,7 +385,7 @@ L<WWW::Scripter::Plugin::JavaScript>.
 
 Hash::Util::FieldHash::Compat
 
-HTML::DOM 0.008 or later
+HTML::DOM 0.032 or later
 
 JE 0.038 or higher
 

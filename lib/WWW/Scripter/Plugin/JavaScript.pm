@@ -10,7 +10,7 @@ use URI::Escape 'uri_unescape';
 use Hash::Util::FieldHash::Compat 'fieldhash';
 use WWW::Scripter 0.007; # working clone and class_info
 
-our $VERSION = '0.003';
+our $VERSION = '0.004';
 
 # Attribute constants (array indices)
 sub mech() { 0 }
@@ -96,7 +96,7 @@ sub eval {
 	}
 	$code =~ s/-->\s*\z//;
 		
-	my $be = $plugin->_start_engine;
+	my $be = $plugin->_start_engine($mech);
 
 	$be->eval($code, $url, $line);
 }
@@ -105,7 +105,7 @@ sub event2sub {
 		my($self,$mech,$elem,undef,$code,$url,$line) = @_;
 
 		$self->
-			_start_engine->event2sub($code,$elem,$url,$line);
+		 _start_engine($mech)->event2sub($code,$elem,$url,$line);
 }
 
 # We have to associate each JS environment with a response object. While
@@ -113,7 +113,7 @@ sub event2sub {
 # URLs have documents (e.g., plain text files).
 sub _start_engine {
 	my $self = shift;
-	my $res = (my $w = $self->[mech])->res;
+	my $res = (my $w = shift)->res;
 	return $self->[jsbe]{$res}
 	 if ($self->[jsbe] ||= &fieldhash({}))->{$res};
 	
@@ -167,7 +167,10 @@ sub bind_classes {
 
 for(qw/set new_function/) {
 	no strict 'refs';
-	*$_ = eval "sub { shift->_start_engine->$_(\@_) }";
+	*$_ = eval "sub {
+		my \$self = shift;
+		\$self->_start_engine( \$self->[".mech."] )->$_(\@_)
+	}";
 }
 
 
@@ -178,16 +181,6 @@ for(qw/set new_function/) {
 #     been loaded. If we have it start the JS engine, we may load it and
 #     then not use it.
 sub engine { shift->[benm] }
-
-
-# ~~~ We may be able to forego this is we make methods above that access
-#     $self->[mech] rely instead on the $mech argument passed in.
-sub clone {
- my $self = shift;
- my $clone = [@$self];
- weaken( $clone->[mech] = shift );
- bless $clone, ref $self;
-}
 
 
 # ------------------ DOCS --------------------#
@@ -201,7 +194,7 @@ WWW::Scripter::Plugin::JavaScript - JavaScript plugin for WWW::Scripter
 
 =head1 VERSION
 
-Version 0.003 (alpha)
+Version 0.004 (alpha)
 
 =head1 SYNOPSIS
 
@@ -281,6 +274,8 @@ This creates a new global JavaScript function out of a coderef. Pass the
 name as
 the first argument and the code ref as the second.
 
+This only applies to the top-level window, not to frames.
+
 =item set
 
 Sets the named variable to the value given. If you want to assign to a
@@ -290,6 +285,8 @@ as a separate argument:
   $w->plugin('JavaScript')->set(
           'document', 'location', 'href' => 'http://www.perl.org/'
   );
+
+This only applies to the top-level window, not to frames.
 
 =item bind_classes
 

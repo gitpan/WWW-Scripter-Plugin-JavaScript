@@ -1,7 +1,7 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         WWW-Scripter-Plugin-JavaScript
-version:      0.003
+version:      0.004
 version_from: lib/WWW/Scripter/Plugin/JavaScript.pm
 installdirs:  site
 requires:
@@ -11,7 +11,7 @@ requires:
     Hash::Util::FieldHash::Compat: 0
     HTML::DOM:                     0.027
     HTML::DOM::EventTarget:        0.032
-    HTML::DOM::Interface:          0
+    HTML::DOM::Interface:          0.032
     JE:                            0.038
     lib:                           0
     LWP::UserAgent:                5.815

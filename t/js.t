@@ -199,3 +199,14 @@ use tests 3; # event handlers
  $m->submit;
  is $m->uri, $url, 'form.onsubmit=function(){return false}';
 }
+
+use tests 1; # iframes (bug in 0.003 and earlier)
+{
+ my $iframe_url = data_url <<'';
+  <script>top.pass = this == top[0]</script>
+
+ $m->get(my $url = data_url "<iframe src='$iframe_url'>");
+ 
+ ok $m->eval('pass'),
+  'scripts in iframes run in the correct JS environment';
+}

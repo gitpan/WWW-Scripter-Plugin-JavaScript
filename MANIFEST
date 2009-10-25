@@ -9,6 +9,7 @@ t/blank.html
 t/je-form-event.html
 t/je.t
 t/js-die.html
+t/js-require.t
 t/js.t
 t/tests.pm
 t/threads/shared.pm
