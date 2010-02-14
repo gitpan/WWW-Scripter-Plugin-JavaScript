@@ -10,7 +10,7 @@ use URI::Escape 'uri_unescape';
 use Hash::Util::FieldHash::Compat 'fieldhash';
 use WWW::Scripter 0.007; # working clone and class_info
 
-our $VERSION = '0.004';
+our $VERSION = '0.005';
 
 # Attribute constants (array indices)
 sub mech() { 0 }
@@ -23,10 +23,11 @@ sub confirm() { 5 }
 sub prompt()  { 6 }
 sub cb() { 7 } # class bindings
 sub tmout() { 8 } # timeouts
+sub f()       { 9 } # functions
 
 {no warnings; no strict;
 undef *$_ for qw/mech jsbe benm init_cb
-                alert confirm prompt tmout/} # These are PRIVATE constants!
+              f alert confirm prompt tmout/} # These are PRIVATE constants!
 
 sub init {
 
@@ -96,7 +97,7 @@ sub eval {
 	}
 	$code =~ s/-->\s*\z//;
 		
-	my $be = $plugin->_start_engine($mech);
+	my $be = $plugin->back_end($mech);
 
 	$be->eval($code, $url, $line);
 }
@@ -105,27 +106,29 @@ sub event2sub {
 		my($self,$mech,$elem,undef,$code,$url,$line) = @_;
 
 		$self->
-		 _start_engine($mech)->event2sub($code,$elem,$url,$line);
+		  back_end($mech)->event2sub($code,$elem,$url,$line);
 }
 
 # We have to associate each JS environment with a response object. While
 # writing this logic, I initially tried to use the document, but not all
 # URLs have documents (e.g., plain text files).
-sub _start_engine {
+sub back_end {
 	my $self = shift;
+ref $_[0] or require Carp, Carp'cluck();
 	my $res = (my $w = shift)->res;
 	return $self->[jsbe]{$res}
 	 if ($self->[jsbe] ||= &fieldhash({}))->{$res};
 	
 	if(!$self->[benm]) {
-	    # try this one first, since it's faster:
-	    eval{require WWW::Scripter::Plugin::JavaScript::SpiderMonkey};
-	    if($@) {
+# When wspjssm is stable enough, these lines can be uncommented:
+#	    # try this one first, since it's faster:
+#	    eval{require WWW::Scripter::Plugin::JavaScript::SpiderMonkey};
+#	    if($@) {
 	        require 
 	            WWW::Scripter::Plugin::JavaScript::JE;
                 $self->[benm] = 'JE'
-            }
-	    else { $self->[benm] = 'SpiderMonkey' };
+#            }
+#	    else { $self->[benm] = 'SpiderMonkey' };
 	}
 	else {
 		require "WWW/Scripter/Plugin/JavaScript/" .
@@ -142,6 +145,9 @@ sub _start_engine {
 		}
 		for my $__(@{$self->[cb]||[]}){
 			$_->bind_classes($__)
+		}
+		for my $__(@{$self->[f]||[]}){
+			$_->new_function(@$__)
 		}
 
 		$_->set('screen', {});
@@ -165,12 +171,15 @@ sub bind_classes {
 	}
 }
 
-for(qw/set new_function/) {
-	no strict 'refs';
-	*$_ = eval "sub {
-		my \$self = shift;
-		\$self->_start_engine( \$self->[".mech."] )->$_(\@_)
-	}";
+sub set { shift->back_end( shift )->set(@_) }
+
+sub new_function {
+	my $plugin = shift;
+	push @{$plugin->[f]}, \@_;
+	if($plugin->[jsbe]) {
+		$_ && $_->new_function(@_)
+		 for values %{ $plugin->[jsbe] };
+	}
 }
 
 
@@ -194,7 +203,7 @@ WWW::Scripter::Plugin::JavaScript - JavaScript plugin for WWW::Scripter
 
 =head1 VERSION
 
-Version 0.004 (alpha)
+Version 0.005 (alpha)
 
 =head1 SYNOPSIS
 
@@ -251,42 +260,37 @@ own functions available to JavaScript.
 
 L<WWW::Scripter>'s C<use_plugin> method will return a plugin object. The
 same object can be retrieved via C<< $w->plugin('JavaScript') >> after the
-plugin is loaded. The following methods can be called on that object:
+plugin is loaded. The same plugin object is used for every page and frame,
+and for every new window derived from the WWW::Scripter object. The
+following methods can be called on that object:
 
 =over 4
 
-=begin comment
-
-~~~ Should this be public? The interface is not what is shown below,
-    as the first arg has to be $w. That makes it awkward to use. $w->eval
-    is much easier.
-
 =item eval
 
-This evaluates the JavaScript code passed to it. You can optionally pass
+This evaluates the JavaScript code passed to it. The WWW::Scripter object
+is the first argument; the string of code the second. You can optionally
+pass
 two more arguments: the file name or URL, and the first line number.
-
-=end comment
-
-=item new_function
-
-This creates a new global JavaScript function out of a coderef. Pass the 
-name as
-the first argument and the code ref as the second.
-
-This only applies to the top-level window, not to frames.
 
 =item set
 
-Sets the named variable to the value given. If you want to assign to a
-property of a property ... of a global property, pass each property name
-as a separate argument:
+Sets the named variable to the value given. The first argument is the
+WWW::Scripter object. The last argument is the value. The intervening
+arguments are the names of properties, so if you want to assign to a
+property of a property ... of a global property, you can pass each property
+name separately like this:
 
   $w->plugin('JavaScript')->set(
-          'document', 'location', 'href' => 'http://www.perl.org/'
+      $w, 'document', 'location', 'href' => 'http://www.perl.org/'
   );
 
-This only applies to the top-level window, not to frames.
+=item new_function
+
+This creates a new global JavaScript function out of a coderef. This
+function is added to every JavaScript environment the plugin has access to. Pass the WWW::Scripter object as the first argument, the 
+name as
+the second and the code ref as the third.
 
 =item bind_classes
 
@@ -304,9 +308,15 @@ also accepts a C<< _constructor >> hash element, which should be set to the
 name of the method to be called when the constructor function is called
 within JavaScript; e.g., C<< _constructor => 'new' >>.
 
+=item back_end
+
+This returns the back end corresponding to the WWW::Scripter object passed
+to it, creating it if necessary. This is intended mostly for back ends
+themselves to use, for accessing frames, etc.
+
 =back
 
-=head1 JAVASCRIPT FEATURES
+=head1 FEATURES AVAILABLE TO JAVASCRIPT
 
 The members of the HTML DOM that are available depend on the versions of
 L<HTML::DOM> and L<CSS::DOM> installed. See L<HTML::DOM::Interface> and
@@ -380,13 +390,16 @@ or URL, and the first line number.
 
 These correspond to those 
 listed above for
-the plugin object. Those methods are simply delegated to the back end, 
-except that C<bind_classes> also does some caching if the back end hasn't
-been initialised yet.
+the plugin object. Unlike the above, though, this C<set> is not passed a
+window as its first argument. Also, C<bind_classes> and C<new_function> are
+only expected to act on a single JavaScript environment. The plugin's own
+methods of the same names make sure every JavaScript environment's methods
+are called.
 
 C<new_function> must also accept a third argument, indicating the return
 type. This (when specified) will be the name of a JavaScript function that
 does the type conversion. Only 'Number' is used right now.
+This requirement may be removed before version 1.
 
 =item event2sub ($code, $elem, $url, $first_line)
 

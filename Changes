@@ -1,5 +1,30 @@
 Revision history for WWW::Scripter::Plugin::JavaScript
 
+0.005   14 February, 2010
+        The JavaScript plugin:
+        • Incompatible changes:
+          • set  now expects a  WWW::Scripter  object  as  the  first
+            argument.
+          • new_function,  which used to offer no more  functionality
+            than  set,  now adds the function to all JS  environments,
+            including future ones (a bit like bind_classes).
+        • New back_end method
+        • The eval method is now public (it was there all along,  but
+          the docs were removed  in  the  conversion  from  the  Mech
+          plugin  to  the  Scripter  plugin;  the  interface  changed
+          slightly in the process).
+        • JE is now the default back end. SpiderMonkey used to be the
+          back end,  but there was never one available,  so that made
+          no difference.  Now there is a SpiderMonkey back  end  (not
+          included),  but it is so full of bugs we need to wait a bit
+          before flipping the switch back.
+        JE back end (0.006):
+        • A piece of JavaScript code  calling  a  method  on  another
+          global object no longer dies.  This was broken  by  0.004’s
+          multiple-window clean-up.
+        • Modified to make use of the plugin’s  new  back_end  method,
+          to reduce memory usage.
+
 0.004   25 October, 2009
         The JavaScript Plugin:
         • Scripts in frames now run in the context of the frame,  not

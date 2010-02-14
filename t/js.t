@@ -1,7 +1,8 @@
 #!perl
 
-# I have not got round to writing a complete set of tests yet. For now I’m
-# just testing for fixed bugs and other changes.
+# This was the original test file for wspjs. Then things started being
+# moved into other files. Whatever is in here now is the miscellaneous
+# stuff that didn’t fit anywhere else.
 
 use strict; use warnings; use utf8;
 use lib 't';
@@ -168,19 +169,6 @@ pweegonk() // line 6
 </script>
 _
 	like $warning, qr/line 6/, 'line numbers after <script>\n\n\n<!--';
-}
-
-use tests 1; # init callback interface (fixed in 0.002)
-{
- my $name = "args to init callback";
- my $passed;
- my $m = new WWW::Scripter;
- my $M = 0+$m; # to avoid circular refs
- $m->use_plugin('JavaScript', init => sub {
-  @_ == 1 and shift == $M and $passed = pass $name
- });
- $m->get(data_url '<script>1+1</script>');
- fail $name unless $passed;
 }
 
 use tests 3; # event handlers

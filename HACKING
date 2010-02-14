@@ -2,50 +2,39 @@
 This file contains a random assortment of notes that might be helpful to
 someone hacking on wspjs and related modules.
 
-(What is shown below is out of date and corresponds to the Mech plugin. It
-needs to be updated. Things are actually less complicated now.)
+STYLE GUIDE (minimalist)
 
+• Write code that works
+• All bug fixes should be accompanied by comments* and tests
+• Be reasonably paranoid and try to keep extensibility in mind
+• Don’t ‘fix’ code that already works
 
-THE BIG PICTURE
+* Try to not split any infinitives or use a preposition like it’s a
+  conjunction.
 
-When you call $mech->get(...), wmpdom’s parse_html handler is called, which
-1. creates an HTML::DOM object,
-2. installs script and event handlers,
-3. sets the defaultView to a Window object¹,
-4. sets the Window object’s document to the DOM object and
-5. passes the HTML code through to the DOM object, which
-    1. creates the tree,
-    2. running any scripts² and 
-    3. creating event handlers.
-6. Finally, it triggers the load event.
+THE RANDOM NOTES
 
-¹There is only one window object for each Mech object.  The DOM  plugin
- stores these in a field hash. It creates a new one only when necessary.
+When the JavaScript plugin is loaded,  it installs itself as a script
+handler as well.  (The same object serves  both  purposes.)  The same
+plugin object is shared by frames and any new  windows  derived  from
+the WWW::Scripter object.
 
-²When a script is run, if it is a JS script, the JS plugin starts the
- script engine if it is not already started.
+When you call  $w->get(...),  WWW::Scripter  fetches and  parses  the
+HTML.  During parsing,  it runs any scripts it comes across  (via the
+script handler’s  eval  method)  and creates event handlers  (via the
+event2sub method).
 
-When the script engine is started:
-1. wmpjs passes the Window object to the JS back end’s constructor.
-2. The back end creates a new object, making the Window object the global
-   object’s delegate.
+Whenever the JS plugin needs access to the back end  (e.g.,  when run-
+ning code), it retrieves it via its own back_end method, which, if it
+does not already exist,  creates a  new  JavaScript  environment  cor-
+responding to the  current  page  (response  object)  of  the  window
+(WWW::Scripter object) passed to it.
 
-The back end has to do some magic to make sure that, when the global object
-is passed to another JS environment, it gets wrapped up in a proxy object
-that delegates to whichever global object corresponds to the  *window*.
-
-
-WEAK/STRONG REFERENCES
-
-==> strong
---> weak
-
-Mech ==> window --> Mech
-                ==> document
-     ==> document --> window
-
-If we have an iframe, it’s
-                                      ==> win
-Mech ==> document ==> iframe ==> mech ==> doc
-     ==> window              ==> win ==> doc --> win
-                                     --> mech
+The JE back end  (wspjsje)  is itself a subclass of JE,  so it is the
+global object. It knows to which window it belongs (with a weak refer-
+ence), and delegates to it.  Whenever a window object is passed to it,
+if it is its own window,  it substitutes itself in its  place.  Other-
+wise it creates a wrapper,  or proxy object,  for  that  window.  The
+proxy uses  AUTOLOAD  to delegate to the  wspjsje  object,  which  is
+retrieved via the plugin’s  back_end  method,  and hence  is  created
+on demand.

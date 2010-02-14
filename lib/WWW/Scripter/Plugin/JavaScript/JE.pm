@@ -9,14 +9,10 @@ use HTML::DOM::Interface 0.032 ':all'; # for the constants (0.032
 use JE 0.038; # call_with              # for UTF16)
 use Scalar::Util 1.09 qw'weaken refaddr';
 
-our $VERSION = '0.005';
+our $VERSION = '0.006';
 our @ISA = 'JE';
 
 fieldhash my %parathia;
-fieldhash my %js_envs;
-# ~~~ Both %js_envs and the field hash contained in the JS plugin are more
-#     or less identical. We need to refactor things to eliminate the redun-
-#     dancy.
 
 # No need to implement eval since JE's method
 # is sufficient
@@ -30,7 +26,6 @@ $types[OBJ ] = null    =>;
 sub new {
 	my $self = SUPER::new{shift} html_mode => 1;
 	weaken( $parathia{$self} = my $parathi = shift );
-	$js_envs{$parathi->response} = $self;
 	
 	my $i = \%WWW'Scripter'WindowInterface;
 	for(grep !/^_/ && $$i{$_} & METHOD, =>=> keys %$i) {
@@ -107,15 +102,10 @@ sub new {
 			#     restrictive wrapper if the $window has a
 			#     different origin.
 			# Fetch the cached JavaScript  environment  corres-
-			# poding to the WWW::Scripter object. If it doesn’t
-			# exist, then we have to create one,  since it is a
-			# page with no scripts.  (JS environments are  cre-
-			# ated on demand.)  We don’t have to use ||=,  as
-			# the ->eval below indirectly calls our own ‘new’
-			#  method,  which  adds  to  the  cache  above.
+			# ponding to the WWW::Scripter object.
 #warn $window, " ", $window->response, " ", $window->uri;
-			no warnings 'uninitialized';
-			refaddr $js_envs{$window->response}
+			refaddr
+			 $window->plugin("JavaScript")->back_end($window)
 			 == refaddr $self
 			  and return $self;
 			(__PACKAGE__."::Proxy")->new($window)
@@ -337,22 +327,28 @@ package WWW::Scripter::Plugin::JavaScript::JE::Proxy;
 #     JavaScript that returns a JE datatype to return a wrapper instead.
 
 sub new {
- return bless \(my $w = pop)
+ # If a method is called on another window, as in frames[0].alert(), an
+ # lvalue is created with the proxy object returned by frames[0]  as the
+ # the base and ‘alert’ as the property name. The lvalue then fetches the
+ # value of frames[0].alert  and runs it with  frames[0]  as the invocant.
+ # This means that it is the proxy  that  gets  passed  to  the  closures
+ # in  WSPJSJE:new  above.  Since  those  expect  to  find  a  window  in
+ # $parathia{$self}, and $self might be a proxy, we have to add ourselves
+ # to the %parathi field hash and store the window there. For the sake of
+ # speed in autoload, we still keep a direct  reference  to  the  window.
+ my $proxy = bless \(my $w = pop);
+ Scalar'Util'weaken( $parathia{$proxy} = $w );
+ $proxy
 }
 
 sub AUTOLOAD {
  my $window = ${;shift};
  (
-  $js_envs{$window->response}
    # We have to use this roundabout method
    # rather than __PACKAGE__->new($window),
    # because the JS plugin needs to do its
    # stuff (binding classes, etc.).
-   ||$window->plugin("JavaScript")
-        ->eval($window,'this')
-				# ~~~ and it looks as though we need to
-				#     modify the JS plugin to make the back
-				#     end accessible (to avoid the eval).
+   $window->plugin("JavaScript")->back_end($window)
  )->${\(our $AUTOLOAD =~ /.*::(.+)\z/)[0]}(@_)
 }
 
@@ -372,7 +368,7 @@ WWW::Scripter::Plugin::JavaScript::JE - JE backend for WSPJS
 
 =head1 VERSION
 
-0.005 (alpha)
+0.006 (alpha)
 
 =head1 DESCRIPTION
 

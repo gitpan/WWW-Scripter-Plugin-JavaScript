@@ -28,7 +28,7 @@ my $js = (my $m = new WWW::Scripter)->use_plugin('JavaScript',
 $m->get(URI::file->new_abs( 't/blank.html' ));
 $js->new_function($_ => \&$_) for qw 'is ok';
 
-use tests 2; # third arg to new_function
+use tests 2; # fourth arg to new_function
 {
 	$js->new_function(foo => sub { return 72 }, 'String');
 	$js->new_function(bar => sub { return 72 }, 'Number');
@@ -54,7 +54,7 @@ use tests 1; # unwrap
 			baz => METHOD | STR
 		}
 	});
-	$js->set('baz', bless[], 'Foo::Bar');
+	$js->set($m, 'baz', bless[], 'Foo::Bar');
 	is($m->eval('baz.baz(null, undefined, 3, "4", baz)'),
 	   'Foo::Bar,^^,^^,JE::Number,JE::String,Foo::Bar', 'unwrap');
 }
@@ -74,7 +74,7 @@ use tests 4; # null DOMString
 			nullbaz => STR,
 		}
 	});
-	$js->set('baz', bless[], 'Phoo::Bar');
+	$js->set($m, 'baz', bless[], 'Phoo::Bar');
 	ok($m->eval('baz.bar(0) === null'),
 		'undef --> null conversion for a DOMString retval');
 	ok($m->eval('baz.bar(1) === "765"'),
@@ -177,7 +177,7 @@ is $m->eval('"brode".link()'), '<a href="undefined">brode</a>',
 use tests 4; # Existence of non-core global JS properties.
 # It’s possible to make properties only half-exist, in that window.foo
 # returns something, but it’s not a scope variable and the hasOwnProperty
-# operator can’t see it. This was the case with collection properties prior
+# method can’t see it.  This was the case with collection properties  prior
 # to version 0.004.
 $m->document->innerHTML("<iframe name=ba>");
 ok $m->eval('hasOwnProperty("document")'),
@@ -214,7 +214,17 @@ $m->eval("
 use tests 1; # frames retaining the same global object from one page to the
              # next (problem in 0.003 and earlier)
 $m->document->innerHTML(q|<iframe name=f></iframe>|);
-$m->eval(q|f.foo="bar"|);
+$m->eval(q|f.smow="bar"|);
 $m->frames->{f}->get("data:text/html,");
-is $m->eval("''+f.foo"), 'undefined',
+is $m->eval("''+f.smow"), 'undefined',
  "JS-less frames get a new global object when a page is fetched";
+
+use tests 1; # Calling JS methods on other windows (bug introduced in 0.004
+             # along with proxies for global objects that fixed the previ-
+             # ous test; fixed in 0.006)
+{
+ my $buffalo;
+ $m->set_alert_function(sub{ $buffalo = shift });
+ $m->frames->[0]->eval("top.alert(\"ooo\")");
+ is $buffalo, 'ooo', 'calling methods with JS on other windows';
+}

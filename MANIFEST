@@ -8,6 +8,8 @@ README
 t/blank.html
 t/je-form-event.html
 t/je.t
+t/js-api.t
+t/js-back-ends.t
 t/js-die.html
 t/js-require.t
 t/js.t

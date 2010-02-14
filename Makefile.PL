@@ -38,6 +38,8 @@ use ExtUtils::MakeMaker;
 	WWW'Scripter => 0,
 #	WWW'Scripter'Plugin'JavaScript => 0,
 );
+eval{require HTML::DOM and VERSION HTML::DOM == 0.034}
+ and $je_prq{HTML::DOM} = 0.035; # getElementById bug
 
 for(\(%js_prq, %je_prq)) {
 	for $k(keys %$_) {
