@@ -1,15 +1,20 @@
-WWW-Scripter-Plugin-JavaScript-0.005 (alpha)
+WWW-Scripter-Plugin-JavaScript-0.006 (alpha)
 
 A plugin for  WWW::Scripter  that provides JavaScript support
 
 This distribution contains:
-WWW::Scripter::Plugin::JavaScript     0.005 — The JavaScript plugin
-WWW::Scripter::Plugin::JavaScript::JE 0.006 — A back end for JE
+WWW::Scripter::Plugin::JavaScript     0.006 — The JavaScript plugin
+WWW::Scripter::Plugin::JavaScript::JE 0.007 — A back end for JE
 
 
 RECENT CHANGES
 
 (See the Changes file for the long version.)
+
+0.006
+-----
+• The JE back end’s event2sub method  (that parses HTML  event  attri-
+  butes)  now sets  $@  instead of dying if there is a  syntax  error.
 
 0.005
 -----
@@ -26,21 +31,6 @@ RECENT CHANGES
 -----
 Scripts in frames now run in the context of the frame,  not  the  top-
 level window.
-
-0.003
------
-• Support  for  HTML::DOM  0.032’s  new  event  handler  model.  This
-  fixes various bugs involving  event  handler  properties  (‘theForm
- .onsubmit’).
-• The JE back end now supports those utterly useless  HTML-generating
-  methods of string objects that have been part of  JavaScript  since
-  the very beginning.
-• The scope of an event handler  now  includes  the  document  object.
-• HTML::DOM’s UTF-16 methods are now used, so textNode.data.length is
-  equivalent to textNode.length.
-• The havoc caused by JavaScript accessing frames whose documents con-
-  tain no scripts has been mostly cleaned up.
-• Various other bug fixes
 
 
 INSTALLATION
@@ -72,7 +62,7 @@ This module requires:
 
 - CSS::DOM
 
-- WWW::Scripter 0.007 or higher
+- WWW::Scripter 0.016 or higher
 
 - Hash::Util::FieldHash::Compat
 

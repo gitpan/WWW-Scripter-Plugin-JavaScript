@@ -1,5 +1,16 @@
 Revision history for WWW::Scripter::Plugin::JavaScript
 
+0.006   18 January, 2010
+        The JavaScript plugin:
+        • The docs have  been  updated  to  clarify  that  back  ends’
+          event2sub  and  eval  methods must  set  $@  on  error  and
+          return normally.
+        • Some more doc changes  to  reflect  the  current  state  of
+          SpiderMonkey support.
+        JE back end (0.007):
+        • event2sub  now sets  $@  instead of dying if there is a syn-
+          tax error.
+
 0.005   14 February, 2010
         The JavaScript plugin:
         • Incompatible changes:

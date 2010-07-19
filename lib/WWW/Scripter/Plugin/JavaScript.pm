@@ -10,7 +10,7 @@ use URI::Escape 'uri_unescape';
 use Hash::Util::FieldHash::Compat 'fieldhash';
 use WWW::Scripter 0.007; # working clone and class_info
 
-our $VERSION = '0.005';
+our $VERSION = '0.006';
 
 # Attribute constants (array indices)
 sub mech() { 0 }
@@ -203,7 +203,7 @@ WWW::Scripter::Plugin::JavaScript - JavaScript plugin for WWW::Scripter
 
 =head1 VERSION
 
-Version 0.005 (alpha)
+Version 0.006 (alpha)
 
 =head1 SYNOPSIS
 
@@ -236,11 +236,15 @@ hash-style arguments and they are as follows:
 
 =item engine
 
-Which JavaScript back end to use. Currently, this module only supports
-L<JE>, a pure-Perl JavaScript interpreter. Later it will support
-SpiderMonkey via either L<JavaScript::SpiderMonkey> or 
-L<JavaScript.pm|JavaScript>. If this option is
-not specified, either SpiderMonkey or JE will be used, whichever is
+Which JavaScript back end to use. Currently, the only two back ends
+available are L<JE>, a pure-Perl JavaScript interpreter, and
+L<WWW::Scripter::Plugin::SpiderMonkey> (that back end is bundled
+separately). The SpiderMonkey back end is just a proof-of-concept as of
+July, 2010, but may become the default in a future version. JE is now the
+default.
+
+If this option is
+not specified, either JE or SpiderMonkey will be used, whichever is
 available. It is possible to
 write one's own bindings for a particular JavaScript engine. See below,
 under L</BACK ENDS>. 
@@ -272,6 +276,8 @@ This evaluates the JavaScript code passed to it. The WWW::Scripter object
 is the first argument; the string of code the second. You can optionally
 pass
 two more arguments: the file name or URL, and the first line number.
+
+This method sets C<$@> and returns C<undef> if there is an error.
 
 =item set
 
@@ -382,6 +388,8 @@ that delegates to whichever global object corresponds to the document.
 This should accept up to three arguments: a string of code, the file name
 or URL, and the first line number.
 
+It must set C<$@> and return C<undef> if there is an error.
+
 =item new_function
 
 =item set
@@ -416,6 +424,9 @@ method is called.
 The function's scope must contain the following objects: the global object,
 the document, the element's form (if there is one) and the element itself.
 
+If the C<$code> could not be compiled, this method must set C<$@> and
+return C<undef>, just like C<eval>.
+
 =item define_setter
 
 This will be called
@@ -432,7 +443,7 @@ perl 5.8.3 or higher (5.8.4 or higher recommended)
 
 HTML::DOM 0.032 or higher
 
-JE 0.022 or later (when there is a SpiderMonkey binding available it will 
+JE 0.022 or later (when the SpiderMonkey binding is stable enough it will 
 become optional)
 
 CSS::DOM
@@ -478,6 +489,10 @@ L<HTML::DOM>
 =item -
 
 L<JE>
+
+=item -
+
+L<WWW::Scripter::Plugin::JavaScript::SpiderMonkey>
 
 =item -
 

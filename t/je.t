@@ -12,7 +12,7 @@ use Test::More;
 use HTML'DOM 0.027;
 use HTML::DOM::Interface ':all';
 use URI::file;
-use WWW::Scripter;
+use WWW::Scripter 0.016; # event2sub and $@
 
 sub data_url {
 	my $u = new URI 'data:';
@@ -227,4 +227,12 @@ use tests 1; # Calling JS methods on other windows (bug introduced in 0.004
  $m->set_alert_function(sub{ $buffalo = shift });
  $m->frames->[0]->eval("top.alert(\"ooo\")");
  is $buffalo, 'ooo', 'calling methods with JS on other windows';
+}
+
+use tests 1; # syntax errors in HTML event attributes
+{
+ my $w;
+ local $SIG{__WARN__} = sub { $w = shift };
+ $m->get('data:text/html,<body onload="a b">');
+ ok $w, "syntax errors in HTML event attributes are turned into warninsg";
 }

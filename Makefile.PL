@@ -35,7 +35,7 @@ use ExtUtils::MakeMaker;
 	lib          => 0,
 	Test::More   => 0,
 	URI::file    => 0,
-	WWW'Scripter => 0,
+	WWW'Scripter =>  .016, # event2sub and $@
 #	WWW'Scripter'Plugin'JavaScript => 0,
 );
 eval{require HTML::DOM and VERSION HTML::DOM == 0.034}

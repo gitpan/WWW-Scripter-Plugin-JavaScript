@@ -9,7 +9,7 @@ use HTML::DOM::Interface 0.032 ':all'; # for the constants (0.032
 use JE 0.038; # call_with              # for UTF16)
 use Scalar::Util 1.09 qw'weaken refaddr';
 
-our $VERSION = '0.006';
+our $VERSION = '0.007';
 our @ISA = 'JE';
 
 fieldhash my %parathia;
@@ -261,7 +261,6 @@ sub event2sub {
 	my ($w, $code, $elem, $url, $line) = @_;
 
 	# ~~~ JE's interface needs to be improved. This is a mess:
-	# ~~~ should this have $mech->warn instead of die?
 	# We need the line break after $code, because there may be a sin-
 	# gle-line comment at the end,  and no line break.  ("foo //bar"
 	# would fail without  this,  because  the  })  would  be  com-
@@ -271,7 +270,7 @@ sub event2sub {
 	# returns a list of form element names and values, which is *not*
 	# what we  want.  (We  want  the  element’s  parent  form  where
 	# applicable.)
-	($w->compile("(function(){ $code\n })",$url,$line)||die $@)
+	($w->compile("(function(){ $code\n })",$url,$line)||return)
 		->execute($w, bless [
 			$w,
 			$w->upgrade($elem->ownerDocument),
@@ -368,7 +367,7 @@ WWW::Scripter::Plugin::JavaScript::JE - JE backend for WSPJS
 
 =head1 VERSION
 
-0.006 (alpha)
+0.007 (alpha)
 
 =head1 DESCRIPTION
 
@@ -384,6 +383,8 @@ Hash::Util::FieldHash::Compat
 HTML::DOM 0.032 or later
 
 JE 0.038 or higher
+
+WWW::Scripter 0.016 or higher
 
 =head1 SEE ALSO
 
