@@ -1,5 +1,14 @@
 Revision history for WWW::Scripter::Plugin::JavaScript
 
+0.007   26 March, 2011
+        Makefile.PL now requires Bundle::LWP5_837 instead of LWP on
+        perl 5.8.7 and lower,  since  LWP  6 does not support 5.8.7.
+        The JavaScript plugin:
+        • An internal change that should not affect the  interface:
+          The  JavaScript  plugin no longer implements  the  screen
+          object. WWW::Scripter now implements it, as should always
+          have been the case.
+
 0.006   18 January, 2010
         The JavaScript plugin:
         • The docs have  been  updated  to  clarify  that  back  ends’

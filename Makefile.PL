@@ -11,17 +11,23 @@ use ExtUtils::MakeMaker;
 	Hash::Util::FieldHash::Compat => 0,
 	HTML'DOM'EventTarget          => 0.032, # new event handler model
 	HTML::DOM::Interface          => 0,
-	LWP::UserAgent                => 5.815, # handlers
 	Scalar::Util                  => 0,
 	strict                        => 0,
 	URI::Escape                   => 0,
 	warnings                      => 0,
-	WWW'Scripter                  => 0.007, # clone and class_info
+	WWW'Scripter                  => 0.022, # screen
 # for testing:
 	lib          => 0,
 	Test::More   => 0,
 	URI::file    => 0,
 );
+if($] < 5.0080071 && !eval 'use LWP::UserAgent 5.815; 1') {
+ $js_prq{'Bundle::LWP5_837'} = 0;
+}
+else {
+ $js_prq{'LWP::UserAgent'} = 5.815; # handlers
+}
+
 %je_prq = (
 	Carp                          => 0,
 	Hash::Util::FieldHash::Compat => 0,

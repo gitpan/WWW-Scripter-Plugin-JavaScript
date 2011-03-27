@@ -3,13 +3,18 @@ WWW-Scripter-Plugin-JavaScript-0.006 (alpha)
 A plugin for  WWW::Scripter  that provides JavaScript support
 
 This distribution contains:
-WWW::Scripter::Plugin::JavaScript     0.006 — The JavaScript plugin
+WWW::Scripter::Plugin::JavaScript     0.007 — The JavaScript plugin
 WWW::Scripter::Plugin::JavaScript::JE 0.007 — A back end for JE
 
 
 RECENT CHANGES
 
 (See the Changes file for the long version.)
+
+0.007
+-----
+Makefile.PL  now requires  Bundle::LWP5_837  instead of  LWP  on perl
+5.8.7 and lower, since LWP 6 does not support 5.8.7.
 
 0.006
 -----
@@ -26,11 +31,6 @@ RECENT CHANGES
 • A piece of JavaScript code  calling  a  method  on  another  global
   object no longer dies.
 • JE is now the default back end, not SpiderMonkey. This is temporary.
-
-0.004
------
-Scripts in frames now run in the context of the frame,  not  the  top-
-level window.
 
 
 INSTALLATION
@@ -62,7 +62,7 @@ This module requires:
 
 - CSS::DOM
 
-- WWW::Scripter 0.016 or higher
+- WWW::Scripter 0.022 or higher
 
 - Hash::Util::FieldHash::Compat
 
@@ -87,7 +87,7 @@ Or try using man (it's faster, in my experience):
 
 COPYRIGHT AND LICENCE
 
-Copyright © 2009 Father Chrysostomos
+Copyright © 2009-11 Father Chrysostomos
 
 This program is free software; you may redistribute it and/or modify
 it under the same terms as perl.

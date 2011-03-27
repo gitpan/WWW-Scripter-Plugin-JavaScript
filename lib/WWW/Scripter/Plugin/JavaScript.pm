@@ -8,9 +8,9 @@ use LWP'UserAgent 5.815;
 use Scalar::Util qw'weaken';
 use URI::Escape 'uri_unescape';
 use Hash::Util::FieldHash::Compat 'fieldhash';
-use WWW::Scripter 0.007; # working clone and class_info
+use WWW::Scripter 0.022; # screen
 
-our $VERSION = '0.006';
+our $VERSION = '0.007';
 
 # Attribute constants (array indices)
 sub mech() { 0 }
@@ -149,13 +149,6 @@ ref $_[0] or require Carp, Carp'cluck();
 		for my $__(@{$self->[f]||[]}){
 			$_->new_function(@$__)
 		}
-
-		$_->set('screen', {});
-			# ~~~ This doesn’t belong here. I need to get a
-			#     wround to addy nit two the win dough object
-			#     one sigh figger out zackly how it shoe be
-			#     done.
-
 	} # for $back_end;
 	{ ($self->[init_cb]||next)->($w); }
 	weaken $self; # closures
@@ -203,7 +196,7 @@ WWW::Scripter::Plugin::JavaScript - JavaScript plugin for WWW::Scripter
 
 =head1 VERSION
 
-Version 0.006 (alpha)
+Version 0.007 (alpha)
 
 =head1 SYNOPSIS
 
@@ -330,11 +323,6 @@ L<CSS::DOM::Interface>.
 
 For a list of the properties of the window object, see 
 L<WWW::Scripter>.
-
-The JavaScript plugin itself provides just the C<screen> object, which is
-empty. Later this may be moved to the WWW::Scripter, but that
-should make little difference to you, unless you are writing bindings for
-another scripting language.
 
 =head1 BACK ENDS
 
@@ -468,7 +456,7 @@ To report bugs, please e-mail the author.
 
 =head1 AUTHOR & COPYRIGHT
 
-Copyright (C) 2009 Father Chrysostomos
+Copyright (C) 2009-11 Father Chrysostomos
 <C<< join '@', sprout => join '.', reverse org => 'cpan' >>E<gt>
 
 This program is free software; you may redistribute it and/or modify
