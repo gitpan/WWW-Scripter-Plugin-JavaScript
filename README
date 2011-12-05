@@ -1,15 +1,21 @@
-WWW-Scripter-Plugin-JavaScript-0.006 (alpha)
+WWW-Scripter-Plugin-JavaScript-0.008 (alpha)
 
 A plugin for  WWW::Scripter  that provides JavaScript support
 
 This distribution contains:
-WWW::Scripter::Plugin::JavaScript     0.007 — The JavaScript plugin
-WWW::Scripter::Plugin::JavaScript::JE 0.007 — A back end for JE
+WWW::Scripter::Plugin::JavaScript     0.008 — The JavaScript plugin
+WWW::Scripter::Plugin::JavaScript::JE 0.008 — A back end for JE
 
 
 RECENT CHANGES
 
 (See the Changes file for the long version.)
+
+0.008
+-----
+• The JavaScript plugin now tells back ends when it has finished with
+  them, so they have a chance to break circular references.
+• The  JE  back end takes advantage of that,  to avoid  memory  leaks.
 
 0.007
 -----
@@ -20,17 +26,6 @@ Makefile.PL  now requires  Bundle::LWP5_837  instead of  LWP  on perl
 -----
 • The JE back end’s event2sub method  (that parses HTML  event  attri-
   butes)  now sets  $@  instead of dying if there is a  syntax  error.
-
-0.005
------
-• Incompatible changes:
-  • set  now expects a  WWW::Scripter  object as the  first  argument.
-  • new_function  now  adds  the  function  to  all  JS  environments.
-• New back_end method
-• The eval method is now public.
-• A piece of JavaScript code  calling  a  method  on  another  global
-  object no longer dies.
-• JE is now the default back end, not SpiderMonkey. This is temporary.
 
 
 INSTALLATION
@@ -56,7 +51,7 @@ This module requires:
 
 - perl 5.8.3 or higher (5.8.4 or higher recommended)
 
-- JE 0.038 or higher
+- JE 0.056 or higher
 
 - HTML::DOM 0.032 or higher
 

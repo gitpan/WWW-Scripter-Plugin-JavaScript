@@ -10,7 +10,7 @@ use URI::Escape 'uri_unescape';
 use Hash::Util::FieldHash::Compat 'fieldhash';
 use WWW::Scripter 0.022; # screen
 
-our $VERSION = '0.007';
+our $VERSION = '0.008';
 
 # Attribute constants (array indices)
 sub mech() { 0 }
@@ -24,9 +24,11 @@ sub prompt()  { 6 }
 sub cb() { 7 } # class bindings
 sub tmout() { 8 } # timeouts
 sub f()       { 9 } # functions
+sub g()        { 10 } # guard objects for back ends, to destroy
+                      # them forcibly
 
 {no warnings; no strict;
-undef *$_ for qw/mech jsbe benm init_cb
+undef *$_ for qw/mech jsbe benm init_cb g cb
               f alert confirm prompt tmout/} # These are PRIVATE constants!
 
 sub init {
@@ -135,6 +137,8 @@ ref $_[0] or require Carp, Carp'cluck();
 			"$$self[benm].pm";
 	}
 
+	($self->[g] ||= &fieldhash({}))->{$res}
+	 = new WWW'Scripter'Plugin'JavaScript'Guard
 	my $back_end = $self->[jsbe]{$res}
 	 = "WWW::Scripter::Plugin::JavaScript::$$self[benm]" -> new( $w );
 	require HTML::DOM::Interface;
@@ -185,6 +189,12 @@ sub new_function {
 sub engine { shift->[benm] }
 
 
+package WWW::Scripter::Plugin::JavaScript::Guard;
+
+sub new { bless \(my $object = pop) }
+DESTROY { eval { ${$_[0]}->destroy } }
+
+
 # ------------------ DOCS --------------------#
 
 1;
@@ -196,7 +206,7 @@ WWW::Scripter::Plugin::JavaScript - JavaScript plugin for WWW::Scripter
 
 =head1 VERSION
 
-Version 0.007 (alpha)
+Version 0.008 (alpha)
 
 =head1 SYNOPSIS
 
@@ -436,7 +446,7 @@ become optional)
 
 CSS::DOM
 
-WWW::Scripter 0.007 or higher
+WWW::Scripter 0.022 or higher
 
 URI
 

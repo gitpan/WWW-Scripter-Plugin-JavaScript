@@ -1,5 +1,14 @@
 Revision history for WWW::Scripter::Plugin::JavaScript
 
+0.008   4 December, 2011
+        The JavaScript plugin:
+        • The JavaScript plugin now calls  ->destroy  on the back end
+          when it has finished with it.  This gives the  back  end  a
+          chance to destroy any circular  references  it  might  have.
+        JE back end:
+        • It now takes advantage of JE’s new JE::Destroyer module, to
+          eliminate circular references.
+
 0.007   26 March, 2011
         Makefile.PL now requires Bundle::LWP5_837 instead of LWP on
         perl 5.8.7 and lower,  since  LWP  6 does not support 5.8.7.

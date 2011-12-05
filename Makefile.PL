@@ -33,6 +33,7 @@ else {
 	Hash::Util::FieldHash::Compat => 0,
 	HTML::DOM::Interface          => 0.032, # UTF16 export
 	JE                            =>  .038, # call_with
+	JE::Destroyer                 => 0,
 	Scalar::Util                  => 1.09, # refaddr
 	strict                        => 0,
 	warnings                      => 0,

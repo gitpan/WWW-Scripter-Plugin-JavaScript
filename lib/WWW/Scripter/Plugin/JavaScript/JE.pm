@@ -6,10 +6,11 @@ use warnings; # :-(
 use Carp 'croak';
 use Hash::Util::FieldHash::Compat 'fieldhash';
 use HTML::DOM::Interface 0.032 ':all'; # for the constants (0.032
-use JE 0.038; # call_with              # for UTF16)
+use JE'Destroyer;                      # for UTF16)
+use JE 0.038; # call_with
 use Scalar::Util 1.09 qw'weaken refaddr';
 
-our $VERSION = '0.007';
+our $VERSION = '0.008';
 our @ISA = 'JE';
 
 fieldhash my %parathia;
@@ -319,6 +320,11 @@ sub exists {
 	}
 }
 
+sub destroy {
+ return SUPER::destroy{@_} if caller eq 'JE::Destroyer';
+ JE'Destroyer'destroy $_[0]
+}
+
 
 package WWW::Scripter::Plugin::JavaScript::JE::Proxy;
 
@@ -367,7 +373,7 @@ WWW::Scripter::Plugin::JavaScript::JE - JE backend for WSPJS
 
 =head1 VERSION
 
-0.007 (alpha)
+0.008 (alpha)
 
 =head1 DESCRIPTION
 
@@ -382,7 +388,7 @@ Hash::Util::FieldHash::Compat
 
 HTML::DOM 0.032 or later
 
-JE 0.038 or higher
+JE 0.056 or higher
 
 WWW::Scripter 0.016 or higher
 
