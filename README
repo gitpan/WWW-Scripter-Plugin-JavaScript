@@ -1,15 +1,24 @@
-WWW-Scripter-Plugin-JavaScript-0.008 (alpha)
+WWW-Scripter-Plugin-JavaScript-0.008a (alpha)
 
 A plugin for  WWW::Scripter  that provides JavaScript support
 
 This distribution contains:
 WWW::Scripter::Plugin::JavaScript     0.008 — The JavaScript plugin
-WWW::Scripter::Plugin::JavaScript::JE 0.008 — A back end for JE
+WWW::Scripter::Plugin::JavaScript::JE 0.009 — A back end for JE
 
 
 RECENT CHANGES
 
 (See the Changes file for the long version.)
+
+0.008a
+-----
+• LWP 6 supports perl 5.8.7 once  more,  so  we  no  longer  require
+  Bundle::LWP5_837.
+
+• The JE back end now binds window methods properly, eliminating err-
+  ors with JE::Object::Proxy objects  (RT #79855).  Thanks to Nathan
+  Chaney for the report.
 
 0.008
 -----
@@ -49,7 +58,7 @@ DEPENDENCIES
 
 This module requires:
 
-- perl 5.8.3 or higher (5.8.4 or higher recommended)
+- perl 5.8.4 or higher
 
 - JE 0.056 or higher
 

@@ -1,5 +1,13 @@
 Revision history for WWW::Scripter::Plugin::JavaScript
 
+0.008a  21 October, 2012
+        LWP 6 supports perl 5.8.7 once more,  so we no longer require
+        Bundle::LWP5_837.
+        JE back end (0.009):
+        • Window methods are now bound properly,  eliminating  errors
+          with  JE::Object::Proxy  objects  (RT  #79855).  Thanks  to
+          Nathan Chaney for the report.
+
 0.008   4 December, 2011
         The JavaScript plugin:
         • The JavaScript plugin now calls  ->destroy  on the back end

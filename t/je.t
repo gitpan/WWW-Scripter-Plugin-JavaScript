@@ -43,7 +43,7 @@ use tests 1; # types of bound read-only properties
 	), 'number', 'types of bound read-only properties';
 }
 
-use tests 1; # unwrap
+use tests 2; # unwrap
 {
 	sub Foo::Bar::baz{
 		return join ',', map ref||(defined()?$_:'^^'),@_
@@ -57,6 +57,10 @@ use tests 1; # unwrap
 	$js->set($m, 'baz', bless[], 'Foo::Bar');
 	is($m->eval('baz.baz(null, undefined, 3, "4", baz)'),
 	   'Foo::Bar,^^,^^,JE::Number,JE::String,Foo::Bar', 'unwrap');
+
+	is $m->eval("getComputedStyle(document.documentElement,null)"),
+	  '[object CSSStyleDeclaration]',
+	  'objects are unwrapped when passed to window methods';
 }
 
 use tests 4; # null DOMString

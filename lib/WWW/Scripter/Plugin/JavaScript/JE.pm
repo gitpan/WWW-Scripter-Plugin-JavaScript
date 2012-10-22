@@ -10,7 +10,7 @@ use JE'Destroyer;                      # for UTF16)
 use JE 0.038; # call_with
 use Scalar::Util 1.09 qw'weaken refaddr';
 
-our $VERSION = '0.008';
+our $VERSION = '0.009';
 our @ISA = 'JE';
 
 fieldhash my %parathia;
@@ -34,9 +34,10 @@ sub new {
 		my $type = $$i{$_};
 		$self->new_method($_ => sub {
 			my $parathi = $parathia{my $self = shift};
-			# undocumented JE method:
+			# undocumented JE methods:
 			$self->_cast(
-				scalar $parathi->$method(@_),
+				scalar
+				 $parathi->$method($self->_unwrap(@_)),
 				$types[$type&TYPE]
 			);
 		});

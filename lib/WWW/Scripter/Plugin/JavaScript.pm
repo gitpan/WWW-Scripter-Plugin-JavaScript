@@ -437,11 +437,11 @@ be removed some time before version 1.
 
 =head1 PREREQUISITES
 
-perl 5.8.3 or higher (5.8.4 or higher recommended)
+perl 5.8.4 or higher
 
 HTML::DOM 0.032 or higher
 
-JE 0.022 or later (when the SpiderMonkey binding is stable enough it will 
+JE 0.056 or later (when the SpiderMonkey binding is stable enough it will 
 become optional)
 
 CSS::DOM

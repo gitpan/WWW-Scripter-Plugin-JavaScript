@@ -21,12 +21,12 @@ use ExtUtils::MakeMaker;
 	Test::More   => 0,
 	URI::file    => 0,
 );
-if($] < 5.0080071 && !eval 'use LWP::UserAgent 5.815; 1') {
- $js_prq{'Bundle::LWP5_837'} = 0;
-}
-else {
+#if($] < 5.0080071 && !eval 'use LWP::UserAgent 5.815; 1') {
+# $js_prq{'Bundle::LWP5_837'} = 0;
+#}
+#else {
  $js_prq{'LWP::UserAgent'} = 5.815; # handlers
-}
+#}
 
 %je_prq = (
 	Carp                          => 0,
@@ -58,8 +58,8 @@ for(\(%js_prq, %je_prq)) {
 WriteMakefile(
     NAME                => 'WWW::Scripter::Plugin::JavaScript',
     AUTHOR              => 'Father Chrysostomos <sprout & cpan . org>',
-    VERSION_FROM        => 'lib/WWW/Scripter/Plugin/JavaScript.pm',
-#    VERSION             => "0.002c",
+#    VERSION_FROM        => 'lib/WWW/Scripter/Plugin/JavaScript.pm',
+    VERSION             => "0.008a",
     ABSTRACT_FROM       => 'lib/WWW/Scripter/Plugin/JavaScript.pm',
     PL_FILES            => {},
     PREREQ_PM           => \%prq,
